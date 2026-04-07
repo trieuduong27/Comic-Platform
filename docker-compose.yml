@@ -1,0 +1,42 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: comic_db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=ComicStrongPass@123
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./Database:/scripts
+    # Command creates the db after 15 seconds
+    command: >
+      bash -c "/opt/mssql/bin/sqlservr & /scripts/entrypoint.sh & wait"
+
+  backend:
+    build:
+      context: ./Backend/ComicPlatform.API
+      dockerfile: Dockerfile
+    container_name: comic_backend
+    ports:
+      - "8080:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=ComicPlatformDB;User=sa;Password=ComicStrongPass@123;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./Frontend/comic-platform-web
+      dockerfile: Dockerfile
+      args:
+        - API_URL=http://backend:8080
+    container_name: comic_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - API_URL=http://backend:8080
+    depends_on:
+      - backend

@@ -1,0 +1,23 @@
+# .NET Backend
+Backend/*/bin/
+Backend/*/obj/
+Backend/**/*.user
+Backend/**/*.suo
+*.dll
+*.pdb
+*.exe
+
+# Frontend Next.js
+Frontend/*/node_modules/
+Frontend/*/.next/
+Frontend/*/out/
+Frontend/*/.env*.local
+
+# Database
+*.bak
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
