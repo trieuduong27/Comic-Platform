@@ -87,10 +87,12 @@ Comic-Platform/
 ### 1. Cài Đặt Database
 
 ```bash
-# Chạy script tạo database và thêm dữ liệu mẫu
+# Chạy từ thư mục gốc của dự án (Comic-Platform/)
 sqlcmd -S "(localdb)\MSSQLLocalDB" -i Database/init_db.sql
 sqlcmd -S "(localdb)\MSSQLLocalDB" -i Database/seed_db.sql
 ```
+
+> ⚠️ Nếu đã có database rồi thì chỉ cần chạy `seed_db.sql` thôi.
 
 ---
 
