@@ -23,6 +23,88 @@ export default function ChaptersManagementPage({ params }: { params: Promise<{ i
     });
   }, [params]);
 
+  // MangaDex logic
+  const [showMangaDexUI, setShowMangaDexUI] = useState(false);
+  const [mangaInfo, setMangaInfo] = useState({ mangaId: "" });
+  const [isFetchingMD, setIsFetchingMD] = useState(false);
+  const [mdChapters, setMdChapters] = useState<any[]>([]);
+  const [importedMDChapters, setImportedMDChapters] = useState<Set<string>>(new Set());
+  const [importingChapterId, setImportingChapterId] = useState<string | null>(null);
+
+  const fetchMangaDexChapters = async () => {
+    setIsFetchingMD(true);
+    try {
+      const apiUrl = process.env.API_URL || "http://localhost:8080";
+      let mdId = mangaInfo.mangaId;
+
+      if (!mdId) {
+        // Find by title
+        const resSearch = await fetch(`${apiUrl}/api/mangadex/search?title=${encodeURIComponent(comicTitle)}`);
+        if (resSearch.ok) {
+          const results = await resSearch.json();
+          if (results.length > 0) {
+            mdId = results[0].id;
+            setMangaInfo({ mangaId: mdId });
+          }
+        }
+      }
+
+      if (!mdId) {
+        alert("Không tìm thấy truyện trên MangaDex. Thử đổi tên hoặc dán trực tiếp ID MangaDex.");
+        setIsFetchingMD(false);
+        return;
+      }
+
+      const res = await fetch(`${apiUrl}/api/mangadex/manga/${mdId}/chapters`);
+      if (res.ok) {
+        const data = await res.json();
+        setMdChapters(data || []);
+      }
+    } catch (err) {
+      alert("Lỗi khi kết nối lấy danh sách chapter.");
+    } finally {
+      setIsFetchingMD(false);
+    }
+  };
+
+  const importMdChapter = async (mdChapterId: string, chapterNum: string, titleStr: string) => {
+    setImportingChapterId(mdChapterId);
+    try {
+      const apiUrl = process.env.API_URL || "http://localhost:8080";
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${apiUrl}/api/mangadex/import-chapter`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          mangaDexChapterId: mdChapterId,
+          comicId: Number(comicId),
+          chapterTitle: titleStr,
+          chapterNumberStr: chapterNum
+        })
+      });
+
+      if (res.ok) {
+        // Success
+        setImportedMDChapters(prev => {
+          const next = new Set(prev);
+          next.add(mdChapterId);
+          return next;
+        });
+        fetchComicData(comicId); // Reload chapters list
+      } else {
+        const errorMsg = await res.text();
+        alert(`Không thể tải: ${errorMsg}`);
+      }
+    } catch (err) {
+      alert("Lỗi kết nối khi import chapter.");
+    } finally {
+      setImportingChapterId(null);
+    }
+  };
+
   const fetchComicData = async (id: string) => {
     try {
       const apiUrl = process.env.API_URL || "http://localhost:8080";
@@ -70,9 +152,65 @@ export default function ChaptersManagementPage({ params }: { params: Promise<{ i
         </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
         <h1 className="title" style={{ margin: 0 }}>Quản lý Chapter: <span style={{ color: "var(--accent-color)" }}>{comicTitle}</span></h1>
-        <Link href={`/admin/comics/${comicId}/chapters/new`} className="btn">
-          + Thêm Chapter
-        </Link>
+        <div style={{ display: "flex", gap: "10px" }}>
+            <button className="btn" style={{ background: "#f97316" }} onClick={() => setShowMangaDexUI(!showMangaDexUI)}>
+            {showMangaDexUI ? "Đóng MangaDex" : "Kéo từ MangaDex"}
+            </button>
+            <Link href={`/admin/comics/${comicId}/chapters/new`} className="btn">
+            + Thêm Chapter
+            </Link>
+        </div>
+      </div>
+
+      <div className="glass-panel" style={{ padding: "2rem", marginBottom: "2rem", display: showMangaDexUI ? "block" : "none" }}>
+        <h3 style={{ marginTop: 0, color: "#f97316" }}>Tải Chapter tự động bằng MangaDex API</h3>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "1rem" }}>
+            <input 
+              type="text" 
+              className="form-input" 
+              style={{ flex: 1, margin: 0 }} 
+              placeholder="Nhập MangaDex ID hoặc để trống hệ thống sẽ tự tìm theo tên..."
+              value={mangaInfo.mangaId}
+              onChange={e => setMangaInfo({...mangaInfo, mangaId: e.target.value})}
+            />
+            <button className="btn" onClick={fetchMangaDexChapters} disabled={isFetchingMD} style={{ width: "150px", background: "#f97316" }}>
+              {isFetchingMD ? "Đang quét..." : "Quét Chapter"}
+            </button>
+        </div>
+        
+        {mdChapters.length > 0 && (
+          <div style={{ maxHeight: "300px", overflowY: "auto", background: "rgba(0,0,0,0.2)", padding: "10px", borderRadius: "8px" }}>
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Chương</th>
+                  <th>Tên Chương MangaDex</th>
+                  <th>Ngôn ngữ</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mdChapters.map(c => (
+                  <tr key={c.id}>
+                    <td>Chapter {c.chapter}</td>
+                    <td>{c.title || "---"}</td>
+                    <td>{c.language}</td>
+                    <td>
+                      <button 
+                        className="btn" 
+                        style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem", background: importedMDChapters.has(c.id) ? "green" : "var(--accent-color)" }}
+                        onClick={() => importMdChapter(c.id, c.chapter, c.title)}
+                        disabled={importedMDChapters.has(c.id) || importingChapterId === c.id}
+                      >
+                        {importingChapterId === c.id ? "Đang tải..." : (importedMDChapters.has(c.id) ? "Đã Xong" : "Import")}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="glass-panel" style={{ padding: "2rem" }}>

@@ -6,6 +6,8 @@ import { useRouter, usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [user, setUser] = useState<{ username: string; role?: string | null } | null>(null);
+  const [genres, setGenres] = useState<any[]>([]);
+  const [isHovering, setIsHovering] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -16,6 +18,13 @@ export default function Navbar() {
     if (token && username) {
       setUser({ username, role });
     }
+
+    // Load genres
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    fetch(`${apiUrl}/api/genres`)
+      .then(res => res.json())
+      .then(data => setGenres(data))
+      .catch(console.error);
   }, []);
 
   const handleLogout = () => {
@@ -68,17 +77,67 @@ export default function Navbar() {
           }}>
             Truyện Mới Nhất
           </Link>
-          <Link href="/categories" style={{ 
-             color: pathname?.startsWith('/categories') ? "white" : "var(--text-secondary)", 
-             textDecoration: "none", 
-             transition: "all 0.2s",
-             fontSize: "1.05rem",
-             fontWeight: pathname?.startsWith('/categories') ? 700 : 500,
-             whiteSpace: "nowrap",
-             textShadow: pathname?.startsWith('/categories') ? "0 0 12px rgba(59, 130, 246, 0.5)" : "none"
-          }}>
-            Thể Loại Truyện
-          </Link>
+          <div 
+            style={{ position: "relative" }} 
+            className="nav-dropdown-wrapper"
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+          >
+            <Link href="/categories" style={{ 
+               color: pathname?.startsWith('/categories') ? "white" : "var(--text-secondary)", 
+               textDecoration: "none", 
+               transition: "all 0.2s",
+               fontSize: "1.05rem",
+               fontWeight: pathname?.startsWith('/categories') ? 700 : 500,
+               whiteSpace: "nowrap",
+               textShadow: pathname?.startsWith('/categories') ? "0 0 12px rgba(59, 130, 246, 0.5)" : "none",
+               display: "flex",
+               alignItems: "center",
+               gap: "0.25rem",
+               padding: "1rem 0"
+            }}>
+              Thể Loại Truyện ▾
+            </Link>
+            
+            {/* Mega Menu Dropdown */}
+            {isHovering && genres.length > 0 && (
+              <div style={{
+                position: "absolute",
+                top: "100%",
+                left: "-200%",
+                width: "600px",
+                background: "var(--surface-color)",
+                border: "1px solid var(--surface-border)",
+                borderRadius: "8px",
+                padding: "1.5rem",
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: "1rem",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                zIndex: 100,
+                backdropFilter: "blur(12px)"
+              }}>
+                 {genres.map(g => (
+                   <Link 
+                     key={g.genreId} 
+                     href={`/categories?genreId=${g.genreId}`}
+                     onClick={() => { setIsHovering(false); }}
+                     style={{
+                       color: "var(--text-secondary)",
+                       textDecoration: "none",
+                       fontSize: "0.95rem"
+                     }}
+                     className="genre-dropdown-item"
+                   >
+                     {g.name}
+                   </Link>
+                 ))}
+                 <style dangerouslySetInnerHTML={{__html: `
+                   .genre-dropdown-item:hover { color: var(--accent-color) !important; font-weight: 600; }
+                 `}} />
+              </div>
+            )}
+          </div>
           </div>
         </div>
         

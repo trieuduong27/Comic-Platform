@@ -129,6 +129,32 @@ namespace ComicPlatform.API.Controllers
             return NoContent();
         }
 
+        // POST: api/Comics/{id}/genres
+        [HttpPost("{id}/genres")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AssignGenres(int id, [FromBody] int[] genreIds)
+        {
+            var comic = await _context.Comics.Include(c => c.ComicGenres).FirstOrDefaultAsync(c => c.ComicId == id);
+            if (comic == null) return NotFound("Comic not found");
+
+            // Remove old genres
+            _context.ComicGenres.RemoveRange(comic.ComicGenres);
+
+            // Add new genres
+            if (genreIds != null && genreIds.Length > 0)
+            {
+                var newGenres = genreIds.Select(genreId => new ComicGenre
+                {
+                    ComicId = id,
+                    GenreId = genreId
+                });
+                _context.ComicGenres.AddRange(newGenres);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Genres assigned successfully" });
+        }
+
         private bool ComicExists(int id)
         {
             return _context.Comics.Any(e => e.ComicId == id);

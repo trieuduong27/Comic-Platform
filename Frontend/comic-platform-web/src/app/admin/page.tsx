@@ -49,9 +49,17 @@ export default function AdminDashboard() {
       <div className="container animate-fade-in">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
         <h1 className="title" style={{ margin: 0 }}>Quản Lý Truyện Tranh</h1>
-        <Link href="/admin/comics/new" className="btn">
-          + Thêm Truyện Mới
-        </Link>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <Link href="/admin/mangadex" className="btn" style={{ background: "#f97316" }}>
+            MangaDex AutoCrawl
+          </Link>
+          <Link href="/admin/genres" className="btn" style={{ background: "#8b5cf6" }}>
+            Cài Đặt Thể Loại
+          </Link>
+          <Link href="/admin/comics/new" className="btn">
+            + Đăng Truyện Mới
+          </Link>
+        </div>
       </div>
 
       <div className="glass-panel" style={{ padding: "2rem" }}>
@@ -81,11 +89,14 @@ export default function AdminDashboard() {
                   <td>{comic.status}</td>
                   <td>{comic.viewCount}</td>
                   <td>
-                    <div style={{ display: "flex", gap: "10px" }}>
-                      <Link href={`/admin/comics/${comic.comicId}/chapters`} className="btn" style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem", background: "var(--accent-color)" }}>
+                    <div style={{ display: "flex", gap: "5px" }}>
+                      <Link href={`/admin/comics/${comic.comicId}/chapters`} className="btn" style={{ padding: "0.4rem 0.6rem", fontSize: "0.8rem", background: "var(--accent-color)" }}>
                         QL Chapters
                       </Link>
-                      <button onClick={() => deleteComic(comic.comicId)} className="btn-danger">
+                      <Link href={`/admin/comics/${comic.comicId}/edit`} className="btn" style={{ padding: "0.4rem 0.6rem", fontSize: "0.8rem", background: "#f59e0b" }}>
+                        Sửa
+                      </Link>
+                      <button onClick={() => deleteComic(comic.comicId)} className="btn-danger" style={{ padding: "0.4rem 0.6rem", fontSize: "0.8rem" }}>
                         Xóa
                       </button>
                     </div>

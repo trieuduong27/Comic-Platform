@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 const API_URL = "http://localhost:8080";
 
@@ -25,17 +26,26 @@ export default function CategoriesPage() {
   const [comics, setComics] = useState<Comic[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const genreIdParam = searchParams.get("genreId");
 
-  // Load genres on mount
+  // Load genres on mount, auto-select based on URL ?genreId=
   useEffect(() => {
     fetch(`${API_URL}/api/genres`)
       .then((r) => r.json())
-      .then((data) => {
+      .then((data: Genre[]) => {
         setGenres(data);
-        if (data.length > 0) setSelectedGenre(data[0]);
+        if (data.length > 0) {
+          if (genreIdParam) {
+            const matched = data.find(g => g.genreId === parseInt(genreIdParam));
+            setSelectedGenre(matched ?? data[0]);
+          } else {
+            setSelectedGenre(data[0]);
+          }
+        }
       })
       .catch(console.error);
-  }, []);
+  }, [genreIdParam]);
 
   // Load comics for selected genre
   useEffect(() => {
@@ -69,35 +79,7 @@ export default function CategoriesPage() {
       <h1 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: "0.5rem" }}>Thể Loại Truyện</h1>
       <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Khám phá truyện theo thể loại yêu thích</p>
 
-      {/* Genre Tabs */}
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
-        {genres.map((g) => {
-          const active = selectedGenre?.genreId === g.genreId;
-          return (
-            <button
-              key={g.genreId}
-              onClick={() => setSelectedGenre(g)}
-              style={{
-                padding: "0.6rem 1.5rem",
-                borderRadius: "999px",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 600,
-                fontSize: "0.95rem",
-                transition: "all 0.2s",
-                background: active
-                  ? (genreColors[g.name] || "linear-gradient(135deg,#3b82f6,#8b5cf6)")
-                  : "rgba(255,255,255,0.05)",
-                color: active ? "white" : "var(--text-secondary)",
-                boxShadow: active ? "0 4px 14px rgba(139,92,246,0.35)" : "none",
-                transform: active ? "scale(1.06)" : "scale(1)",
-              }}
-            >
-              {g.name}
-            </button>
-          );
-        })}
-      </div>
+
 
       {/* Comics Grid */}
       <div className="glass-panel" style={{ padding: "2rem" }}>
