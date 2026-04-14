@@ -4,7 +4,7 @@ export default async function Home() {
   let comics: any[] = [];
   let total = 0;
   try {
-    const apiUrl = process.env.API_URL || "http://localhost:5134";
+    const apiUrl = process.env.API_URL || "http://localhost:8080";
     const res = await fetch(`${apiUrl}/api/comics`, { cache: "no-store" });
     if (res.ok) {
       const json = await res.json();
@@ -28,7 +28,6 @@ export default async function Home() {
           Nền tảng đọc truyện mượt mà, tốc độ cao và cực kỳ xịn xò.
         </p>
       </header>
-
       <div className="glass-panel" style={{ padding: "2rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
           <h2 style={{ fontSize: "1.5rem", fontWeight: 700, margin: 0 }}>🔥 Truyện Nổi Bật <span style={{ fontSize: "0.9rem", fontWeight: 400, color: "var(--text-secondary)" }}>({total} truyện)</span></h2>

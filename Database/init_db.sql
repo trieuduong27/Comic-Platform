@@ -20,7 +20,7 @@ CREATE TABLE Comics (
     Title NVARCHAR(200) NOT NULL,
     Slug NVARCHAR(250) NOT NULL UNIQUE,
     Description NVARCHAR(MAX),
-    CoverImage NVARCHAR(500),
+    CoverImage NVARCHAR(2000),
     Status NVARCHAR(20) DEFAULT 'Ongoing' CHECK (Status IN ('Ongoing', 'Completed')),
     ViewCount INT DEFAULT 0,
     CreatedAt DATETIME DEFAULT GETDATE()
@@ -56,7 +56,7 @@ CREATE TABLE Chapters (
 CREATE TABLE ChapterImages (
     ImageId INT IDENTITY(1,1) PRIMARY KEY,
     ChapterId INT NOT NULL,
-    ImageUrl NVARCHAR(500) NOT NULL,
+    ImageUrl NVARCHAR(2000) NOT NULL,
     PageOrder INT NOT NULL,
     FOREIGN KEY (ChapterId) REFERENCES Chapters(ChapterId) ON DELETE CASCADE
 );

@@ -20,4 +20,8 @@ Frontend/*/.env*.local
 .DS_Store
 Thumbs.db
 .vscode/
+.vs/
 *.log
+
+# Uploads
+Backend/*/wwwroot/uploads/

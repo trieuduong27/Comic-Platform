@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
-const API_URL = "http://localhost:5134";
+const API_URL = "http://localhost:8080";
 
 interface Genre {
   genreId: number;
@@ -61,12 +61,12 @@ export default function CategoriesPage() {
     <div className="container animate-fade-in" style={{ paddingTop: "2rem", paddingBottom: "4rem" }}>
       {/* Breadcrumb */}
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
-        <Link href="/" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.9rem" }}>Home</Link>
+        <Link href="/" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.9rem" }}>Trang Chủ</Link>
         <span style={{ color: "var(--text-secondary)" }}>/</span>
-        <span style={{ color: "var(--text-primary)", fontSize: "0.9rem" }}>Categories</span>
+        <span style={{ color: "var(--text-primary)", fontSize: "0.9rem" }}>Thể Loại</span>
       </div>
 
-      <h1 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: "0.5rem" }}>📚 Thể Loại Truyện</h1>
+      <h1 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: "0.5rem" }}>Thể Loại Truyện</h1>
       <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Khám phá truyện theo thể loại yêu thích</p>
 
       {/* Genre Tabs */}

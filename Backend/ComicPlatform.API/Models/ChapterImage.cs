@@ -11,7 +11,7 @@ namespace ComicPlatform.API.Models
         public Chapter Chapter { get; set; }
 
         [Required]
-        [MaxLength(500)]
+        [MaxLength(2000)]
         public string ImageUrl { get; set; }
         
         public int PageOrder { get; set; }

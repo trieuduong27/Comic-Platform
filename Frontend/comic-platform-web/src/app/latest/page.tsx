@@ -4,7 +4,7 @@ export default async function LatestPage() {
   let comics: any[] = [];
   let total = 0;
   try {
-    const apiUrl = process.env.API_URL || "http://localhost:5134";
+    const apiUrl = process.env.API_URL || "http://localhost:8080";
     const res = await fetch(`${apiUrl}/api/comics/latest`, { cache: "no-store" });
     if (res.ok) {
       const json = await res.json();
@@ -20,12 +20,12 @@ export default async function LatestPage() {
       {/* Header */}
       <div style={{ marginBottom: "2.5rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
-          <Link href="/" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.9rem" }}>Home</Link>
+          <Link href="/" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.9rem" }}>Trang Chủ</Link>
           <span style={{ color: "var(--text-secondary)" }}>/</span>
-          <span style={{ color: "var(--text-primary)", fontSize: "0.9rem" }}>Latest</span>
+          <span style={{ color: "var(--text-primary)", fontSize: "0.9rem" }}>Mới Nhất</span>
         </div>
         <h1 style={{ fontSize: "2rem", fontWeight: 800, margin: 0 }}>
-          🕐 Truyện Mới Nhất <span style={{ fontSize: "1rem", fontWeight: 400, color: "var(--text-secondary)" }}>({total} truyện)</span>
+          Truyện Mới Nhất <span style={{ fontSize: "1rem", fontWeight: 400, color: "var(--text-secondary)" }}>({total} truyện)</span>
         </h1>
         <p style={{ color: "var(--text-secondary)", marginTop: "0.5rem" }}>Các bộ truyện mới được cập nhật gần đây nhất</p>
       </div>

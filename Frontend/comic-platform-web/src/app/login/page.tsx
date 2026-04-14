@@ -17,7 +17,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5134/api/auth/login", {
+      const res = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, passwordHash: password }), // Backend maps PasswordHash field currently
@@ -32,6 +32,7 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", data.username);
       localStorage.setItem("userId", data.userId);
+      localStorage.setItem("role", data.role);
       
       // Navigate to home and refresh
       window.location.href = "/";

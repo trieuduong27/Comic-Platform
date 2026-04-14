@@ -19,7 +19,7 @@ namespace ComicPlatform.API.Models
         
         public string Description { get; set; }
         
-        [MaxLength(500)]
+        [MaxLength(2000)]
         public string CoverImage { get; set; }
         
         [MaxLength(20)]

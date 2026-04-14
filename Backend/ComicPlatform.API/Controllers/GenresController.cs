@@ -1,7 +1,10 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ComicPlatform.API.Data;
+using Microsoft.AspNetCore.Authorization;
+using ComicPlatform.API.Models;
 
 namespace ComicPlatform.API.Controllers
 {
@@ -25,6 +28,19 @@ namespace ComicPlatform.API.Controllers
                 .ToListAsync();
 
             return Ok(genres);
+        }
+
+        // POST: api/genres
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PostGenre(Genre genre)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            _context.Genres.Add(genre);
+            await _context.SaveChangesAsync();
+
+            return Ok(genre);
         }
     }
 }

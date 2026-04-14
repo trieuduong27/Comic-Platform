@@ -63,11 +63,50 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Seed Admin Account
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    // Ensure DB is created first
+    try 
+    {
+        context.Database.EnsureCreated();
+        
+        var adminUser = context.Users.FirstOrDefault(u => u.Username == "admin");
+        if (adminUser == null)
+        {
+            adminUser = new ComicPlatform.API.Models.User
+            {
+                Username = "admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                Role = "Admin",
+                CreatedAt = DateTime.UtcNow
+            };
+            context.Users.Add(adminUser);
+            Console.WriteLine("----> Seeded default Admin account (admin / admin123)");
+        }
+        else
+        {
+            // Force reset password and role
+            adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123");
+            adminUser.Role = "Admin";
+            Console.WriteLine("----> Reset Admin account password to admin123");
+        }
+        context.SaveChanges();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"----> Error seeding DB: {ex.Message}");
+    }
+}
 
 app.Run();

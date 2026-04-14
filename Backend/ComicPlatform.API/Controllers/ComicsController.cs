@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ComicPlatform.API.Data;
 using ComicPlatform.API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ComicPlatform.API.Controllers
 {
@@ -78,6 +79,59 @@ namespace ComicPlatform.API.Controllers
                 return NotFound();
 
             return Ok(comic);
+        }
+        // POST: api/Comics
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PostComic(Comic comic)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            _context.Comics.Add(comic);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetComic), new { id = comic.ComicId }, comic);
+        }
+
+        // PUT: api/Comics/5
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PutComic(int id, Comic comic)
+        {
+            if (id != comic.ComicId) return BadRequest();
+
+            _context.Entry(comic).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ComicExists(id)) return NotFound();
+                else throw;
+            }
+
+            return NoContent();
+        }
+
+        // DELETE: api/Comics/5
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteComic(int id)
+        {
+            var comic = await _context.Comics.FindAsync(id);
+            if (comic == null) return NotFound();
+
+            _context.Comics.Remove(comic);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool ComicExists(int id)
+        {
+            return _context.Comics.Any(e => e.ComicId == id);
         }
     }
 }
