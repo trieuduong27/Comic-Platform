@@ -104,25 +104,36 @@ using (var scope = app.Services.CreateScope())
     {
         context.Database.EnsureCreated();
         
-        var adminUser = context.Users.FirstOrDefault(u => u.Username == "admin");
-        if (adminUser == null)
+        var adminUsername = builder.Configuration["AdminSettings:Username"];
+        var adminPassword = builder.Configuration["AdminSettings:Password"];
+
+        if (!string.IsNullOrEmpty(adminUsername) && !string.IsNullOrEmpty(adminPassword))
         {
-            adminUser = new ComicPlatform.API.Models.User
+            var adminUser = context.Users.FirstOrDefault(u => u.Username == adminUsername);
+            if (adminUser == null)
             {
-                Username = "admin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-                Role = "Admin",
-                CreatedAt = DateTime.UtcNow
-            };
-            context.Users.Add(adminUser);
-            Console.WriteLine("----> Seeded default Admin account (admin / admin123)");
+                adminUser = new ComicPlatform.API.Models.User
+                {
+                    Username = adminUsername,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+                    Role = "Admin",
+                    CreatedAt = DateTime.UtcNow
+                };
+                context.Users.Add(adminUser);
+                Console.WriteLine($"----> Seeded default Admin account from configuration: {adminUsername}");
+            }
+            else
+            {
+                // Optionally update password if needed, or leave it. We'll update to ensure it matches config.
+                adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
+                adminUser.Role = "Admin";
+                Console.WriteLine($"----> Reset Admin account password for: {adminUsername}");
+            }
+            context.SaveChanges();
         }
         else
         {
-            // Force reset password and role
-            adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123");
-            adminUser.Role = "Admin";
-            Console.WriteLine("----> Reset Admin account password to admin123");
+            Console.WriteLine("----> No Admin account configured in appsettings/env. Skipping admin seed.");
         }
         context.SaveChanges();
     }
