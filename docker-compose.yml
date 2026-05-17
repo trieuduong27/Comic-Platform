@@ -10,6 +10,7 @@ services:
       - "1433:1433"
     volumes:
       - ./Database:/scripts
+      - sqldata:/var/opt/mssql
     # Command creates the db after 15 seconds
     command: >
       bash -c "/opt/mssql/bin/sqlservr & /scripts/entrypoint.sh & wait"
@@ -40,3 +41,6 @@ services:
       - API_URL=http://backend:8080
     depends_on:
       - backend
+
+volumes:
+  sqldata:
