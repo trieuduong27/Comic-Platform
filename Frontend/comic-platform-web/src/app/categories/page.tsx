@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 const API_URL = "http://localhost:8080";
@@ -20,7 +20,7 @@ interface Comic {
   viewCount: number;
 }
 
-export default function CategoriesPage() {
+function CategoriesContent() {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [selectedGenre, setSelectedGenre] = useState<Genre | null>(null);
   const [comics, setComics] = useState<Comic[]>([]);
@@ -129,5 +129,13 @@ export default function CategoriesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CategoriesPage() {
+  return (
+    <Suspense fallback={<div style={{ textAlign: "center", padding: "4rem 0" }}>Đang tải...</div>}>
+      <CategoriesContent />
+    </Suspense>
   );
 }

@@ -32,15 +32,10 @@ export default function RegisterPage() {
         body: JSON.stringify({ username, passwordHash: password }), // Backend maps PasswordHash field currently
       });
 
-      if (!res.ok) {
-        let msg = "Register failed";
-        try {
-          const data = await res.json();
-          msg = data.message || msg;
-        } catch {
-          msg = await res.text();
-        }
-        throw new Error(msg);
+      const jsonResponse = await res.json();
+
+      if (jsonResponse.status !== "success") {
+        throw new Error(jsonResponse.message || "Register failed");
       }
 
       setSuccess(true);

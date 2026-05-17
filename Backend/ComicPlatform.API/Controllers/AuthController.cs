@@ -30,7 +30,11 @@ namespace ComicPlatform.API.Controllers
         public async Task<IActionResult> Register([FromBody] User user)
         {
             if (await _context.Users.AnyAsync(u => u.Username == user.Username))
-                return BadRequest(new { Message = "Username already exists" });
+                return StatusCode(409, new { 
+                    status = "error", 
+                    message = "Tên tài khoản này đã tồn tại. Vui lòng chọn một tên khác.",
+                    code = "USERNAME_ALREADY_EXISTS"
+                });
 
             var newUser = new User
             {
@@ -43,7 +47,20 @@ namespace ComicPlatform.API.Controllers
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            return Ok(new { Message = "User registered successfully" });
+            return Ok(new 
+            { 
+                status = "success",
+                message = "Đăng ký tài khoản thành công.",
+                data = new
+                {
+                    user = new 
+                    {
+                        id = newUser.UserId.ToString(),
+                        username = newUser.Username,
+                        createdAt = newUser.CreatedAt
+                    }
+                }
+            });
         }
 
         [HttpPost("login")]
@@ -52,11 +69,33 @@ namespace ComicPlatform.API.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == loginUser.Username);
             
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginUser.PasswordHash, user.PasswordHash))
-                return Unauthorized(new { Message = "Invalid credentials" });
+                return Unauthorized(new { 
+                    status = "error", 
+                    message = "Tên tài khoản hoặc mật khẩu không chính xác.",
+                    code = "INVALID_CREDENTIALS"
+                });
 
             var token = GenerateJwtToken(user);
 
-            return Ok(new { Token = token, UserId = user.UserId, Username = user.Username, Role = user.Role });
+            return Ok(new 
+            { 
+                status = "success",
+                message = "Đăng nhập thành công.",
+                data = new 
+                {
+                    user = new 
+                    {
+                        id = user.UserId.ToString(), 
+                        username = user.Username, 
+                        role = user.Role 
+                    },
+                    tokens = new
+                    {
+                        accessToken = token,
+                        expiresIn = 7 * 24 * 60 * 60 // 7 days in seconds
+                    }
+                }
+            });
         }
 
         private string GenerateJwtToken(User user)

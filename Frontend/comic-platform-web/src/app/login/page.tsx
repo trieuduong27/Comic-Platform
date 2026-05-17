@@ -28,11 +28,17 @@ export default function LoginPage() {
         throw new Error(text || "Login failed");
       }
 
-      const data = await res.json();
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", data.username);
-      localStorage.setItem("userId", data.userId);
-      localStorage.setItem("role", data.role);
+      const jsonResponse = await res.json();
+      
+      if (jsonResponse.status !== "success") {
+        throw new Error(jsonResponse.message || "Login failed");
+      }
+
+      const data = jsonResponse.data;
+      localStorage.setItem("token", data.tokens.accessToken);
+      localStorage.setItem("username", data.user.username);
+      localStorage.setItem("userId", data.user.id);
+      localStorage.setItem("role", data.user.role);
       
       // Navigate to home and refresh
       window.location.href = "/";
