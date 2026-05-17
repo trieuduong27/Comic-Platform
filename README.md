@@ -84,7 +84,16 @@ Comic-Platform/
 
 ---
 
-### 1. Cài Đặt Database
+### 1. Cấu Hình Môi Trường (Bảo mật)
+
+Trước khi chạy, bạn cần thiết lập mật khẩu cho dự án bằng cách copy các file mẫu:
+
+1. Copy file `.env.example` thành `.env` và điền mật khẩu của bạn.
+2. Copy file `Backend/ComicPlatform.API/appsettings.example.json` thành `appsettings.json` và điền mật khẩu database cùng với JWT Secret Key.
+
+---
+
+### 2. Cài Đặt Database
 
 ```bash
 # Chạy từ thư mục gốc của dự án (Comic-Platform/)
@@ -96,7 +105,7 @@ sqlcmd -S "(localdb)\MSSQLLocalDB" -i Database/seed_db.sql
 
 ---
 
-### 2. Chạy Backend
+### 3. Chạy Backend
 
 ```bash
 cd Backend/ComicPlatform.API
@@ -108,7 +117,7 @@ dotnet run --launch-profile http
 
 ---
 
-### 3. Chạy Frontend
+### 4. Chạy Frontend
 
 ```bash
 cd Frontend/comic-platform-web
