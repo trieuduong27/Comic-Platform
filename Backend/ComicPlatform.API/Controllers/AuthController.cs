@@ -101,7 +101,11 @@ namespace ComicPlatform.API.Controllers
         private string GenerateJwtToken(User user)
         {
             var jwtSettings = _configuration.GetSection("Jwt");
-            var keyStr = jwtSettings["Key"] ?? "ThisIsAVerySuperSecretKeyForComicPlatform123!@#";
+            var keyStr = jwtSettings["Key"];
+            if (string.IsNullOrEmpty(keyStr))
+            {
+                throw new InvalidOperationException("JWT Key is not configured.");
+            }
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyStr));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
