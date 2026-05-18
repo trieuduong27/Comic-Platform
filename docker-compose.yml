@@ -1,19 +1,15 @@
 services:
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mysql:8.0
     container_name: comic_db
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=${DB_PASSWORD}
-      - MSSQL_PID=Developer
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=ComicPlatformDB
     ports:
-      - "1433:1433"
+      - "3307:3306"
     volumes:
-      - ./Database:/scripts
-      - sqldata:/var/opt/mssql
-    # Command creates the db after 15 seconds
-    command: >
-      bash -c "/opt/mssql/bin/sqlservr & /scripts/entrypoint.sh & wait"
+      - ./Database/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      - mysqldata:/var/lib/mysql
 
   backend:
     build:
@@ -23,7 +19,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=Server=db;Database=ComicPlatformDB;User=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__DefaultConnection=Server=db;Port=3306;Database=ComicPlatformDB;Uid=root;Pwd=${DB_PASSWORD};
       - ASPNETCORE_ENVIRONMENT=Development
       - AdminSettings__Username=${ADMIN_USERNAME}
       - AdminSettings__Password=${ADMIN_PASSWORD}
@@ -45,4 +41,4 @@ services:
       - backend
 
 volumes:
-  sqldata:
+  mysqldata:

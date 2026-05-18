@@ -5,6 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
+// Load .env file from the root directory for local development
+var envPath = Path.Combine(Directory.GetCurrentDirectory(), "../../.env");
+if (File.Exists(envPath))
+{
+    DotNetEnv.Env.Load(envPath);
+}
+
 // Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -36,8 +43,9 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddHttpClient<ComicPlatform.API.Services.MangaDexService>();
 
@@ -104,8 +112,8 @@ using (var scope = app.Services.CreateScope())
     {
         context.Database.EnsureCreated();
         
-        var adminUsername = builder.Configuration["AdminSettings:Username"];
-        var adminPassword = builder.Configuration["AdminSettings:Password"];
+        var adminUsername = builder.Configuration["AdminSettings:Username"] ?? Environment.GetEnvironmentVariable("ADMIN_USERNAME");
+        var adminPassword = builder.Configuration["AdminSettings:Password"] ?? Environment.GetEnvironmentVariable("ADMIN_PASSWORD");
 
         if (!string.IsNullOrEmpty(adminUsername) && !string.IsNullOrEmpty(adminPassword))
         {

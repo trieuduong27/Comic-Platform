@@ -1,36 +1,29 @@
--- Active: 1775542421232@@127.0.0.1@3306@comicplatformdb
-CREATE DATABASE ComicPlatformDB;
-GO
-
-USE ComicPlatformDB;
-GO
-
 -- Users Table
 CREATE TABLE Users (
-    UserId INT IDENTITY(1,1) PRIMARY KEY,
-    Username NVARCHAR(50) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(255) NOT NULL,
-    Role NVARCHAR(20) DEFAULT 'User' CHECK (Role IN ('User', 'Admin')),
-    CreatedAt DATETIME DEFAULT GETDATE()
+    UserId INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,
+    Role VARCHAR(20) DEFAULT 'User' CHECK (Role IN ('User', 'Admin')),
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Comics Table
 CREATE TABLE Comics (
-    ComicId INT IDENTITY(1,1) PRIMARY KEY,
-    Title NVARCHAR(200) NOT NULL,
-    Slug NVARCHAR(250) NOT NULL UNIQUE,
-    Description NVARCHAR(MAX),
-    CoverImage NVARCHAR(2000),
-    Status NVARCHAR(20) DEFAULT 'Ongoing' CHECK (Status IN ('Ongoing', 'Completed')),
+    ComicId INT AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(200) NOT NULL,
+    Slug VARCHAR(250) NOT NULL UNIQUE,
+    Description TEXT,
+    CoverImage VARCHAR(2000),
+    Status VARCHAR(20) DEFAULT 'Ongoing' CHECK (Status IN ('Ongoing', 'Completed')),
     ViewCount INT DEFAULT 0,
-    CreatedAt DATETIME DEFAULT GETDATE()
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Genres Table
 CREATE TABLE Genres (
-    GenreId INT IDENTITY(1,1) PRIMARY KEY,
-    Name NVARCHAR(50) NOT NULL UNIQUE,
-    Slug NVARCHAR(100) NOT NULL UNIQUE
+    GenreId INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL UNIQUE,
+    Slug VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- ComicGenres (N-N)
@@ -44,19 +37,19 @@ CREATE TABLE ComicGenres (
 
 -- Chapters Table
 CREATE TABLE Chapters (
-    ChapterId INT IDENTITY(1,1) PRIMARY KEY,
+    ChapterId INT AUTO_INCREMENT PRIMARY KEY,
     ComicId INT NOT NULL,
     ChapterNumber FLOAT NOT NULL,
-    Title NVARCHAR(200),
-    CreatedAt DATETIME DEFAULT GETDATE(),
+    Title VARCHAR(200),
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ComicId) REFERENCES Comics(ComicId) ON DELETE CASCADE
 );
 
 -- ChapterImages Table
 CREATE TABLE ChapterImages (
-    ImageId INT IDENTITY(1,1) PRIMARY KEY,
+    ImageId INT AUTO_INCREMENT PRIMARY KEY,
     ChapterId INT NOT NULL,
-    ImageUrl NVARCHAR(2000) NOT NULL,
+    ImageUrl VARCHAR(2000) NOT NULL,
     PageOrder INT NOT NULL,
     FOREIGN KEY (ChapterId) REFERENCES Chapters(ChapterId) ON DELETE CASCADE
 );
@@ -65,7 +58,7 @@ CREATE TABLE ChapterImages (
 CREATE TABLE Bookmarks (
     UserId INT NOT NULL,
     ComicId INT NOT NULL,
-    SavedAt DATETIME DEFAULT GETDATE(),
+    SavedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (UserId, ComicId),
     FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
     FOREIGN KEY (ComicId) REFERENCES Comics(ComicId) ON DELETE CASCADE
